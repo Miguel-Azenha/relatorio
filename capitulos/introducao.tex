@@ -1,0 +1,30 @@
+\chapter*{Introdução}
+\addcontentsline{toc}{chapter}{Introdução}
+
+O presente trabalho prático tem como objetivo explorar a tecnologia Intel Software Guard Extensions (SGX) no desenvolvimento de uma aplicação de carteira eletrónica, destinada ao armazenamento seguro de credenciais de acesso a plataformas informáticas.  
+A segurança e confidencialidade das credenciais são fatores críticos, dado que estas contêm informações sensíveis como nomes de utilizador, senhas de acesso e descrições dos contextos de utilização.
+
+A aplicação a desenvolver deverá permitir a gestão de até 100 credenciais diferentes, disponibilizando funcionalidades essenciais ao utilizador, tais como: 
+\begin{enumerate}
+    \item criação de uma nova carteira;
+    \item visualização do conteúdo da carteira;
+    \item adição de novas credenciais;
+    \item remoção de credenciais existentes;
+    \item geração de senhas de acesso seguras, com comprimento variável entre 8 e 100 caracteres.
+\end{enumerate}
+
+Para cada credencial, devem ser armazenados o nome de utilizador (até 100 caracteres), a senha de acesso (8 a 100 caracteres) e uma descrição identificativa do cenário de utilização (até 100 caracteres).  
+A persistência dos dados deverá ser garantida através de armazenamento em ficheiro, utilizando cifra AES-GCM de 128 bits para assegurar confidencialidade e integridade, incluindo a senha de acesso que protege a carteira.
+
+Adicionalmente, a funcionalidade de \emph{sealing} deverá ser utilizada para garantir a proteção dos dados no ficheiro, permitindo a sua recuperação segura em execuções posteriores.  
+A minimização da \emph{Trusted Computing Base} (TCB) é recomendada, de forma a reduzir a superfície de ataque e aumentar a segurança global da aplicação.
+
+Este trabalho permite aplicar na prática os conceitos aprendidos em aula, incluindo:
+\begin{itemize}
+    \item criação e destruição de enclaves SGX;
+    \item comunicação segura entre aplicação não confiável e enclave (\emph{ECALLs} e \emph{OCALLs});
+    \item implementação de mecanismos de confidencialidade e integridade em dados persistentes;
+    \item utilização de técnicas de selagem (\emph{sealing}) para armazenamento seguro de dados sensíveis.
+\end{itemize}
+
+A realização deste projeto reforça a compreensão da utilização de enclaves SGX em cenários de segurança real e a importância da proteção de dados sensíveis em aplicações práticas.

@@ -1,0 +1,27 @@
+\documentclass[a4paper,12pt]{report}
+
+\usepackage[utf8]{inputenc}
+\usepackage[portuguese]{babel}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{setspace}
+
+\addto\captionsportuguese{\renewcommand{\contentsname}{Índice}}
+
+\begin{document}
+
+% Incluir capa
+\include{capa/capa}
+
+% Índice
+\tableofcontents
+\clearpage
+
+% Capítulos
+\include{capitulos/introducao}
+\include{capitulos/enquadramento_teorico}
+\include{capitulos/implementacao}
+\include{capitulos/conclusoes}
+
+\end{document}
