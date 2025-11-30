@@ -1,0 +1,211 @@
+
+Este capítulo descreve detalhadamente a implementação da aplicação de carteira eletrónica
+desenvolvida com suporte da tecnologia Intel SGX. São analisadas as decisões de 
+particionamento do código entre os domínios confiável (enclave) e não confiável 
+(aplicação), o desenho da interface de comunicação entre estes domínios, a utilização das 
+operações de selagem para armazenamento persistente e as medidas adotadas para garantir a 
+minimização da \textit{Trusted Computing Base} (TCB). 
+
+\section{Arquitetura Geral da Aplicação}
+
+A aplicação desenvolvida segue o modelo padrão para aplicações Intel SGX, composto por duas 
+componentes principais:
+
+\begin{itemize}
+    \item \textbf{Aplicação não confiável} (\textit{untrusted}, ficheiro \texttt{app.c}): 
+    responsável pela interação com o utilizador, gestão de argumentos, criação e destruição 
+    do enclave e execução de OCALLs relacionadas com operações externas (e.g.\ I/O em 
+    ficheiros e consola).
+    
+    \item \textbf{Enclave SGX} (\texttt{enclave.c}): contém todas as operações sensíveis, 
+    nomeadamente gestão da carteira, verificação de passwords, geração de senhas aleatórias, 
+    validação de políticas de segurança, além das operações de selagem e desselagem.
+\end{itemize}
+
+Este modelo segue a recomendação presente nas aulas: \textit{colocar no enclave apenas o 
+mínimo código necessário para manipular dados sensíveis}, mantendo toda a lógica genérica na 
+aplicação não confiável, de forma a reduzir a superfície de ataque.
+
+\section{Particionamento entre Domínios Confiável e Não Confiável}
+
+Com base nos princípios apresentados nos slides de \textit{Writing an SGX Application}, foi 
+realizada uma análise sistemática dos dados e funções que exigiam proteção forte. Foram 
+classificados como \textbf{sensíveis}:
+
+\begin{itemize}
+    \item a \textbf{master password} da carteira;
+    \item todas as \textbf{credenciais} (títulos, utilizadores e passwords associadas);
+    \item operações de \textbf{verificação} de passwords;
+    \item o algoritmo de \textbf{geração de senhas} aleatórias;
+    \item a \textbf{estrutura interna} da carteira (\texttt{wallet\_t}).
+\end{itemize}
+
+Estes elementos foram colocados no enclave, que garante:
+
+\begin{itemize}
+    \item isolamento em memória (EPC);
+    \item impossibilidade de leitura pelo SO ou hipervisor;
+    \item integridade do código carregado;
+    \item execução apenas de código analisado.
+\end{itemize}
+
+Por outro lado, operações consideradas não sensíveis foram mantidas na aplicação externa:
+
+\begin{itemize}
+    \item parsing de argumentos da linha de comandos;
+    \item impressão de mensagens na consola;
+    \item gestão de ficheiros com dados selados;
+    \item validação sintática de parâmetros de entrada.
+\end{itemize}
+
+Esta separação corresponde diretamente ao modelo apresentado nos slides, onde o código com 
+acesso a dados críticos deve residir numa TCB reduzida.
+
+\section{Estruturas de Dados e Tipos Implementados}
+
+A carteira é armazenada no enclave como uma instância da seguinte estrutura:
+
+\begin{verbatim}
+typedef struct {
+    char title[WALLET_MAX_ITEM_SIZE];
+    char username[WALLET_MAX_ITEM_SIZE];
+    char password[WALLET_MAX_ITEM_SIZE];
+} item_t;
+
+typedef struct {
+    char master_password[WALLET_MAX_ITEM_SIZE];
+    size_t size;
+    item_t items[WALLET_MAX_ITEMS];
+} wallet_t;
+\end{verbatim}
+
+O enclave contém a única cópia destas estruturas em memória clara, garantindo que:
+
+\begin{itemize}
+    \item nenhuma credencial é carregada na aplicação externa;
+    \item a master password nunca sai da EPC;
+    \item apenas dados selados (ciphertext + metadados GCM) atravessam a fronteira do enclave.
+\end{itemize}
+
+\section{Interface EDL e Comunicação entre Domínios}
+
+Seguindo as regras do \textit{Enclave Definition Language} (EDL), a interface exposta pelo 
+enclave foi reduzida ao conjunto mínimo necessário de ECALLs:
+
+\begin{itemize}
+    \item \texttt{ecall\_create\_wallet()}
+    \item \texttt{ecall\_show\_wallet()}
+    \item \texttt{ecall\_add\_item()}
+    \item \texttt{ecall\_remove\_item()}
+    \item \texttt{ecall\_change\_master\_password()}
+    \item \texttt{ecall\_generate\_password()}
+\end{itemize}
+
+Conforme recomendado nas aulas, limitar o número de ECALLs reduz o ataque potencial ao 
+enclave, uma vez que cada fronteira cruzada representa um ponto de validação.
+
+As OCALLs implementadas também seguem o princípio de minimização:
+
+\begin{itemize}
+    \item \texttt{ocall\_print\_string()} — impressão segura na consola;
+    \item \texttt{ocall\_save\_sealed\_data()} — gravação de dados selados;
+    \item \texttt{ocall\_load\_sealed\_data()} — leitura de dados selados.
+\end{itemize}
+
+A EDL gerada por \texttt{sgx\_edger8r} trata automaticamente:
+\begin{itemize}
+    \item validação de buffers;
+    \item marshalling seguro;
+    \item prevenção de \textit{buffer overflows};
+    \item verificação de direções de ponteiros.
+\end{itemize}
+
+\section{Operações Sensíveis no Enclave}
+
+\subsection{Verificação e Política de Passwords}
+
+A função \texttt{check\_password\_policy()} implementa restrições minimamente 
+necessárias para evitar entradas inseguras. Colocá-la dentro do enclave impede ataques 
+baseados na manipulação do fluxo de validação externo.
+
+\subsection{Geração de Passwords Seguras}
+
+A função \texttt{ecall\_generate\_password()} utiliza diretamente 
+\texttt{sgx\_read\_rand()}, que acede ao gerador de números aleatórios seguro do processador. 
+O uso de TRNG é obrigatório para evitar previsibilidade e ataques criptográficos, substituindo 
+funções pseudo-aleatórias tradicionais.
+
+\subsection{Manipulação da Carteira}
+
+Todas as funções que alteram o conteúdo da carteira operam exclusivamente dentro do enclave:
+\begin{itemize}
+    \item cópia e verificação de campos;
+    \item verificação da master password;
+    \item adição e remoção de itens;
+    \item substituição da master password.
+\end{itemize}
+
+\section{Selagem e Desselagem de Dados}
+
+A persistência dos dados é garantida por selagem utilizando as funções do SDK:
+
+\begin{itemize}
+    \item \texttt{sgx\_seal\_data()};
+    \item \texttt{sgx\_unseal\_data()}.
+\end{itemize}
+
+Os dados selados são armazenados num ficheiro externo, mas:
+
+\begin{itemize}
+    \item incluem GCM authentication tag;
+    \item incorporam IV gerado automaticamente;
+    \item são encriptados com chave derivada pelo \textit{hardware};
+    \item são autenticados criptograficamente.
+\end{itemize}
+
+Estes aspetos correspondem diretamente ao slide ``Sealing Properties''.
+
+\section{Minimização da Trusted Computing Base}
+
+Durante o desenvolvimento, foram tomadas medidas específicas para reduzir ao máximo a TCB:
+
+\begin{itemize}
+    \item nenhuma operação de I/O dentro do enclave;
+    \item nenhuma alocação dinâmica complexa fora das funções permitidas;
+    \item ausência de bibliotecas externas não confiáveis dentro do enclave;
+    \item validação estrita de parâmetros em cada ECALL;
+    \item redução da interface exposta no EDL ao mínimo.
+\end{itemize}
+
+Estas decisões seguem as recomendações do slide:
+\textit{“ISVs should attempt to minimize the enclave size.”}
+
+\section{Fluxo Completo das Operações}
+
+As principais operações seguem o fluxo:
+
+\begin{enumerate}
+    \item Aplicação recebe input do utilizador.
+    \item ECALL é invocada com dados sanitizados.
+    \item Enclave valida parâmetros e executa operação.
+    \item Enclave sela dados (apenas quando necessário).
+    \item OCALL guarda dados selados no ficheiro.
+    \item Enclave devolve resultado seguro.
+\end{enumerate}
+
+Em nenhum momento dados sensíveis são expostos ao exterior.
+
+\section{Resumo}
+
+A implementação cumpre todos os objetivos do trabalho:
+\begin{itemize}
+    \item protege credenciais e passwords dentro de um enclave SGX;
+    \item assegura confidencialidade e integridade via AES-GCM;
+    \item usa selagem para armazenamento persistente;
+    \item reduz a superfície de ataque via TCB minimizada;
+    \item implementa comunicação segura via ECALLs/OCALLs;
+    \item utiliza TRNG para criação de passwords.
+\end{itemize}
+
+Este capítulo demonstra que a solução desenvolvida segue as melhores práticas ensinadas nas 
+aulas e documentadas pela Intel.

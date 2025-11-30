@@ -1,2 +1,62 @@
-\chapter*{Conclusões}
-\addcontentsline{toc}{chapter}{Conclusões}
+
+O trabalho desenvolvido permitiu aplicar, de forma prática e aprofundada, os conceitos 
+estudados na unidade curricular no âmbito da utilização de \textit{Trusted Execution 
+Environments} (TEEs), com particular foco na tecnologia Intel SGX. A implementação de uma 
+carteira eletrónica capaz de armazenar credenciais sensíveis demonstrou concretamente como 
+os enclaves podem reforçar a proteção de dados críticos em sistemas potencialmente 
+comprometidos.
+
+A arquitetura final da aplicação seguiu rigorosamente as recomendações apresentadas tanto 
+nas aulas como na documentação da Intel. Em particular, foi dada especial atenção à 
+\textbf{minimização da Trusted Computing Base}, mantendo dentro do enclave apenas o conjunto 
+estritamente necessário de funções e dados: a master password, as credenciais, as operações 
+de validação, manipulação e geração de dados sensíveis. Todas as operações de interação com 
+o exterior---tanto com o utilizador, como com o sistema de ficheiros---foram mantidas na 
+aplicação não confiável, reduzindo a superfície de ataque e aumentando a resiliência do 
+sistema.
+
+Um dos aspetos mais relevantes do projeto foi a aplicação prática das técnicas de 
+\textbf{selagem} e \textbf{desselagem}, essenciais para garantir persistência dos dados num 
+formato seguro. A utilização das primitivas \texttt{sgx\_seal\_data()} e 
+\texttt{sgx\_unseal\_data()} permitiu assegurar que a carteira nunca é armazenada em memória 
+ou em disco de forma legível, sendo protegida por cifragem AES-GCM a 128 bits com chaves 
+geradas e geridas internamente pelo hardware SGX. Esta propriedade é fundamental para 
+proteger o sistema mesmo em cenários de comprometimento total do sistema operativo ou de 
+acesso físico ao dispositivo.
+
+O trabalho possibilitou também a experimentação com os mecanismos de comunicação entre o 
+enclave e a aplicação, nomeadamente através de ECALLs e OCALLs. A correta definição da 
+interface EDL revelou-se essencial para assegurar o encapsulamento dos dados sensíveis e a 
+validação rigorosa de parâmetros nas transições entre domínios. Este modelo reforça a 
+compreensão das limitações e desafios específicos dos TEEs, especialmente no que diz 
+respeito ao controlo apertado de fronteiras e à necessidade de evitar a exposição acidental 
+de dados.
+
+Outro contributo importante foi a integração do gerador de números aleatórios seguro do SGX 
+para a geração de passwords fortes. Esta componente demonstrou na prática a importância de 
+se recorrer a fontes de entropia confiáveis, uma vez que mecanismos pseudo-aleatórios 
+tradicionais não seriam adequados para um cenário de segurança elevada como o presente.
+
+Apesar de bem-sucedida, a implementação apresentou algumas limitações intrínsecas à 
+tecnologia SGX, tais como o tamanho reduzido da memória EPC e a impossibilidade de utilizar 
+certas bibliotecas ou primitivas avançadas no interior do enclave. Estas limitações foram 
+contornadas através de um desenho modular e cuidadoso, mas refletem ainda assim a realidade 
+de que os enclaves exigem um planeamento rigoroso da arquitetura e dos fluxos de dados.
+
+Em suma, o projeto permitiu consolidar uma compreensão sólida sobre:
+
+\begin{itemize}
+    \item a importância de isolar dados e operações sensíveis;
+    \item o papel dos enclaves como mecanismos de proteção mesmo perante um sistema 
+    operativo comprometido;
+    \item a utilização prática das operações de selagem para garantir persistência segura;
+    \item as dificuldades e decisões envolvidas na minimização da TCB;
+    \item o modelo de comunicação seguro baseado em ECALLs e OCALLs;
+    \item o impacto das restrições dos TEEs no desenho de software seguro.
+\end{itemize}
+
+A solução final cumpre todos os requisitos especificados, apresentando uma carteira 
+eletrónica funcional, segura e alinhada com as melhores práticas recomendadas para o uso da 
+tecnologia Intel SGX. O trabalho realizado constitui uma base sólida para o desenvolvimento 
+de sistemas mais complexos de gestão e proteção de dados sensíveis, seja no contexto de 
+aplicações de segurança, criptografia ou computação confidencial.

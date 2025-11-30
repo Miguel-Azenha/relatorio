@@ -1,27 +1,161 @@
-\documentclass[a4paper,12pt]{report}
+\documentclass{relatorio}
 
-\usepackage[utf8]{inputenc}
-\usepackage[portuguese]{babel}
-\usepackage{graphicx}
-\usepackage{hyperref}
+\makeatletter
+\usepackage{float}
 \usepackage{listings}
-\usepackage{setspace}
+\usepackage{xcolor}
+\usepackage[utf8]{inputenc}
+\usepackage{ragged2e} % Pacote para justificação
+\usepackage{subcaption}
+\usepackage[backend=biber, style=numeric, sorting=none]{biblatex}
+\usepackage{xcolor,soul,lipsum}
+\usepackage{tabularx} % no preâmbulo
+\usepackage{subcaption}
+\newcommand{\myul}[2][black]{\setulcolor{#1}\ul{#2}\setulcolor{black}}
 
-\addto\captionsportuguese{\renewcommand{\contentsname}{Índice}}
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.447,0.557,0.090}
+\definecolor{backcolour}{rgb}{1,1,1}
+
+
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{orange},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=1
+}
+
+\makeatother
+\newcounter{saveenumerate}
+\makeatletter
+\newcommand{\enumeratext}[1]{%
+\setcounter{saveenumerate}{\value{enum\romannumeral\the\@enumdepth}}
+\setcounter{enum\romannumeral\the\@enumdepth}{\value{saveenumerate}}%
+}
+\makeatother
 
 \begin{document}
+\pagenumbering{gobble}
 
-% Incluir capa
-\include{capa/capa}
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=1\textwidth]{imagens/isel_logo.png}
+    %\caption{\label{fig:ISEL-logo} Logótipo do ISEL.}
+\end{figure}
 
-% Índice
+\begin{center}
+\bigskip
+\noindent {\large Instituto Superior de Engenharia de Lisboa}\\
+\smallskip
+\noindent {\large Mestrado de Engenharia Informática e Multimédia}\\
+\bigskip
+\noindent {\large Ano letivo 2025/2026}\\
+% \bigskip
+% \bigskip
+\vfill
+\noindent {\LARGE {\bf  Cibersegurança}}\\
+\smallskip
+\noindent {\large Trabalho Prático nº 3}\\
+\bigskip
+\bigskip
+\noindent {} \\
+
+\end{center}
+\vfill
+% \bigskip
+% \bigskip
+% \bigskip
+% \bigskip
+% \bigskip
+% \bigskip
+% \bigskip
+% \bigskip
+
+\begin{center}
+
+
+    \noindent Turma \\
+    \bigskip
+    \noindent Miguel Azenha, A47708\\
+    \noindent Marta, \\
+
+
+
+\vfill
+%\monthyeardate
+\large{Dezembro de 2025}
+
+\end{center}
+
+%-------------------------------------------------
+\newpage
+\pagenumbering{Roman}
+\addtocounter{page}{0}
+\setcounter{tocdepth}{3}
+
 \tableofcontents
+
+\clearpage
+\listoffigures
+%\listoftables
+%\lstlistoflistings
 \clearpage
 
-% Capítulos
-\include{capitulos/introducao}
-\include{capitulos/enquadramento_teorico}
-\include{capitulos/implementacao}
-\include{capitulos/conclusoes}
+% Chapters_____________________________
+
+\setlength{\parskip}{1em} 
+				% Begin arabic page numbering (1,2,...)
+
+%-------------------------------------------------
+
+\pagenumbering{arabic}
+\addtocounter{page}{0}
+
+
+%____________________________________________________
+\section{Introdução} 
+\label{A}
+\justifying% Garante que o conteúdo da seção seja justificado
+\input{capitulos/introducao.tex}
+\pagebreak
+
+
+%____________________________________________________
+\section{Enquadramento Teórico} 
+\label{B}
+\justifying% Garante que o conteúdo da seção seja justificado
+\input{capitulos/enquadramento_teorico.tex}
+\pagebreak
+%____________________________________________________
+
+
+\section{Implementação} 
+\label{C}
+\justifying% Garante que o conteúdo da seção seja justificado
+\input{capitulos/implementacao.tex}
+\pagebreak
+%____________________________________________________
+
+\section{Conclusões} 
+\label{D}
+\justifying% Garante que o conteúdo da seção seja justificado
+\input{capitulos/conclusoes.tex}
+\pagebreak
+
+
 
 \end{document}

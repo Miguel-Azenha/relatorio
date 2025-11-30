@@ -1,4 +1,105 @@
-\chapter*{Enquadramento Teórico}
-\addcontentsline{toc}{chapter}{Enquadramento Teórico}
 
-\subsection{Título}
+
+Este capítulo apresenta os fundamentos teóricos necessários para compreender o desenvolvimento 
+de aplicações baseadas em \textit{Trusted Execution Environments} (TEEs), com particular 
+foco na tecnologia Intel Software Guard Extensions (SGX), utilizada neste trabalho para 
+proteger dados sensíveis de uma carteira eletrónica. São explorados os conceitos fundamentais 
+de enclaves, modelo de ameaça, comunicação segura entre domínios de confiança e mecanismos 
+de selagem (\textit{sealing}) para armazenamento persistente.
+
+\subsection{Trusted Execution Environments}
+
+Um \textit{Trusted Execution Environment} (TEE) é um ambiente seguro, isolado do sistema 
+operativo e das aplicações comuns, que se destina à execução de código sensível. O objetivo 
+dos TEEs é proteger dados em uso, enfrentando uma limitação de segurança tradicional, embora a 
+criptografia proteja dados em repouso e em trânsito, estes permanecem vulneráveis quando 
+estão a ser processados na memória de sistemas potencialmente comprometidos.
+
+Os TEEs garantem:
+\begin{itemize}
+    \item \textbf{Confidencialidade}: dados dentro do TEE não podem ser acedidos por software externo
+    \item \textbf{Integridade}: o código e dados protegidos não podem ser modificados
+    \item \textbf{Isolamento}: o estado do TEE é independente do sistema operativo 
+    \item \textbf{Autenticidade}: o TEE permite provar a sua identidade e integridade 
+\end{itemize}
+
+SGX e TrustZone representam abordagens distintas dentro do mesmo paradigma de computação 
+confiável, o SGX fornece enclaves ao nível de aplicação, enquanto TrustZone divide todo o 
+processador em duas áreas, uma segura e outra não segura.
+
+\subsection{Intel Software Guard Extensions}
+
+Intel SGX é uma tecnologia de isolamento de memória que permite criar enclaves, regiões 
+protegidas que executam código de forma isolada do sistema operativo, BIOS, firmware, 
+hipervisor ou aplicações externas. O mecanismo baseia-se na Enclave Page Cache (EPC), uma 
+área de memória física protegida por hardware e inacessível a processos externos, mesmo com 
+privilégios elevados.
+
+\subsection{Arquitetura dos Enclaves}
+
+Um enclave é uma biblioteca compilada como \textit{shared object} contendo:
+\begin{itemize}
+    \item \textbf{Código confiável};
+    \item \textbf{Dados sensíveis};
+    \item \textbf{Metadados de segurança};
+    \item \textbf{Tamanho do heap}, \textbf{stack} e número de \textbf{trusted threads}.
+\end{itemize}
+
+Estes metadados são utilizados pelo carregador não confiável para preparar a EPC, mas sem 
+nunca aceder ao conteúdo real do enclave.
+
+De acordo com a Intel, assumem-se como não confiáveis o sistema operativo, hipervisor, drivers, firware e aplicações externas.
+O atacante pode controlar todo o sistema operativo e observar a memória, mas não consegue let ou alterar os dados dentro do enclave, pois eles estão protegidos por hardware.
+
+
+\section{Interface entre Código Confiável e Não Confiável}
+
+A comunicação entre a aplicação não confiável e o enclave é feita com base em:
+\begin{description}
+    \item[ECALLs] chamadas da aplicação para o enclave (entrada);
+    \item[OCALLs] chamadas do enclave para a aplicação (saída).
+\end{description}
+
+Esta interface é descrita no ficheiro \texttt{.edl}, que especifica:
+\begin{itemize}
+    \item tipos de dados permitidos atravessar a fronteira de confiança;
+    \item tamanhos de buffers;
+    \item direções de ponteiros;
+    \item validação automática feita pelo proxy gerado pelo \texttt{sgx\_edger8r}.
+\end{itemize}
+
+
+\section{Selagem e Armazenamento Seguro}
+
+A selagem (\textit{sealing}) é um mecanismo essencial para permitir persistência de dados 
+confidenciais. Embora o enclave ofereça proteção em memória, os seus dados são perdidos 
+quando o mesmo é encerrado. Assim, é necessário guardar estes dados num ficheiro ou base de 
+dados externa, mas de forma criptograficamente protegida antes de os dados deixarem o 
+enclave.
+
+
+\section{Minimização da Trusted Computing Base}
+
+Um dos princípios fundamentais na construção de TEEs é a minimização da TCB — o conjunto de 
+código confiável cuja segurança é crítica. Tal como discutido nas aulas, um enclave deve 
+conter:
+\begin{itemize}
+    \item apenas a lógica que manipula dados sensíveis;
+    \item apenas funções essenciais;
+    \item estruturas de dados estritamente necessárias.
+\end{itemize}
+
+No projeto:
+\begin{itemize}
+    \item toda a criptografia, verificação de passwords, manipulação da carteira e geração 
+          segura de passwords ocorrem no enclave;
+    \item a interface é reduzida a um conjunto mínimo de ECALLs.
+\end{itemize}
+
+
+\section{Síntese}
+
+O enquadramento teórico apresentado demonstra que Intel SGX fornece um TEE adequado para 
+proteção de dados sensíveis ao nível da aplicação, oferecendo isolamento forte e suporte 
+nativo para selagem. Estas capacidades tornam SGX ideal para a construção de uma carteira 
+segura persistente, tal como implementado neste trabalho.

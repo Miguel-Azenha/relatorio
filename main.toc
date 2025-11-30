@@ -1,5 +1,24 @@
 \babel@toc {portuguese}{}\relax 
-\contentsline {chapter}{Introdução}{2}{chapter*.2}%
-\contentsline {chapter}{Enquadramento Teórico}{4}{chapter*.3}%
-\contentsline {subsection}{\numberline {0.0.1}Título}{4}{subsection.0.0.1}%
-\contentsline {chapter}{Conclusões}{5}{chapter*.4}%
+\contentsline {section}{\numberline {1}Introdução}{1}{section.1}%
+\contentsline {section}{\numberline {2}Enquadramento Teórico}{2}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Trusted Execution Environments}{2}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Intel Software Guard Extensions}{2}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}Arquitetura dos Enclaves}{2}{subsection.2.3}%
+\contentsline {section}{\numberline {3}Interface entre Código Confiável e Não Confiável}{3}{section.3}%
+\contentsline {section}{\numberline {4}Selagem e Armazenamento Seguro}{3}{section.4}%
+\contentsline {section}{\numberline {5}Minimização da Trusted Computing Base}{3}{section.5}%
+\contentsline {section}{\numberline {6}Síntese}{3}{section.6}%
+\contentsline {section}{\numberline {7}Implementação}{5}{section.7}%
+\contentsline {section}{\numberline {8}Arquitetura Geral da Aplicação}{5}{section.8}%
+\contentsline {section}{\numberline {9}Particionamento entre Domínios Confiável e Não Confiável}{5}{section.9}%
+\contentsline {section}{\numberline {10}Estruturas de Dados e Tipos Implementados}{6}{section.10}%
+\contentsline {section}{\numberline {11}Interface EDL e Comunicação entre Domínios}{6}{section.11}%
+\contentsline {section}{\numberline {12}Operações Sensíveis no Enclave}{7}{section.12}%
+\contentsline {subsection}{\numberline {12.1}Verificação e Política de Passwords}{7}{subsection.12.1}%
+\contentsline {subsection}{\numberline {12.2}Geração de Passwords Seguras}{7}{subsection.12.2}%
+\contentsline {subsection}{\numberline {12.3}Manipulação da Carteira}{7}{subsection.12.3}%
+\contentsline {section}{\numberline {13}Selagem e Desselagem de Dados}{7}{section.13}%
+\contentsline {section}{\numberline {14}Minimização da Trusted Computing Base}{8}{section.14}%
+\contentsline {section}{\numberline {15}Fluxo Completo das Operações}{8}{section.15}%
+\contentsline {section}{\numberline {16}Resumo}{8}{section.16}%
+\contentsline {section}{\numberline {17}Conclusões}{10}{section.17}%
